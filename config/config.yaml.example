@@ -1,0 +1,95 @@
+# AntiFraud Agent Configuration File
+# Copy this file to config.yaml and customize
+
+# ============================================
+# Identity
+# ============================================
+identity_name: "AntiFraudAgent"
+identity_class: "system"
+
+# ============================================
+# LLM Configuration
+# ============================================
+llm_backend: "local"  # Options: local, openai, custom
+model_path: "/models/llama-2-7b.gguf"
+n_ctx: 4096
+n_gpu_layers: 0
+temperature: 0.7
+max_tokens: 512
+
+# For OpenAI/Custom
+# llm_backend: "openai"
+# api_key: "your-api-key"
+# model_name: "gpt-3.5-turbo"
+
+# ============================================
+# Agent Configuration
+# ============================================
+max_urls_to_crawl: 50
+max_iocs_to_enrich: 100
+max_concurrent_crawls: 5
+crawl_timeout: 30
+max_depth: 2
+cti_fetch_limit: 100
+
+# ============================================
+# CTI Sources
+# ============================================
+urlhaus_enabled: true
+
+virustotal_enabled: false
+virustotal_api_key: ""
+
+trend_enabled: false
+trend_api_key: ""
+trend_base_url: "https://api.xdr.trendmicro.com"
+
+# ============================================
+# STIX Export
+# ============================================
+export_to_trend: false
+export_to_opencti: false
+
+opencti_url: ""
+opencti_token: ""
+
+# ============================================
+# Scheduling
+# ============================================
+daily_enabled: true
+daily_time: "07:00"
+timezone: "America/Montreal"
+
+interval_enabled: false
+interval_hours: 6
+
+# ============================================
+# Email Notifications
+# ============================================
+email_enabled: true
+
+smtp_host: "smtp.gmail.com"
+smtp_port: 587
+smtp_username: ""
+smtp_password: ""
+from_address: ""
+recipient_addresses:
+  - "admin@example.com"
+  - "security@example.com"
+
+use_tls: true
+use_ssl: false
+
+# ============================================
+# MCP Tools
+# ============================================
+mcp_web_search_enabled: false
+mcp_code_analysis_enabled: false
+mcp_screenshot_enabled: false
+
+# ============================================
+# Logging
+# ============================================
+log_level: "INFO"
+log_file: "/logs/antifraud-agent.log"
+log_format: "json"

@@ -1,0 +1,108 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "antifraud-cti-agent"
+version = "1.0.0"
+description = "Autonomous agent-driven fraud and CTI detection with LLM, web crawling, and STIX export"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "AntiFraudAgent Team"}
+]
+keywords = ["fraud-detection", "cti", "threat-intelligence", "stix", "llm", "agent"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+]
+
+dependencies = [
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0.1",
+    "pydantic>=2.5.3",
+    "pydantic-settings>=2.1.0",
+    "langchain>=0.1.0",
+    "langchain-community>=0.0.10",
+    "langchain-core>=0.1.10",
+    "llama-cpp-python>=0.2.27",
+    "openai>=1.7.2",
+    "crawl4ai>=0.2.5",
+    "docling>=1.0.2",
+    "beautifulsoup4>=4.12.2",
+    "lxml>=4.9.3",
+    "pypdf>=3.17.4",
+    "python-magic>=0.4.27",
+    "Pillow>=10.1.0",
+    "transformers>=4.36.2",
+    "torch>=2.1.2",
+    "accelerate>=0.25.0",
+    "stix2>=3.0.1",
+    "taxii2-client>=2.3.0",
+    "vt-py>=0.18.3",
+    "requests>=2.31.0",
+    "urllib3>=2.1.0",
+    "schedule>=1.2.0",
+    "APScheduler>=3.10.4",
+    "streamlit>=1.29.0",
+    "plotly>=5.18.0",
+    "pandas>=2.1.4",
+    "mcp>=0.9.0",
+    "cryptography>=41.0.7",
+    "bcrypt>=4.1.2",
+    "python-jose[cryptography]>=3.3.0",
+    "sqlalchemy>=2.0.23",
+    "structlog>=23.3.0",
+    "python-json-logger>=2.0.7",
+    "tenacity>=8.2.3",
+    "validators>=0.22.0",
+    "pytz>=2023.3",
+    "python-dateutil>=2.8.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.3",
+    "pytest-asyncio>=0.21.1",
+    "pytest-cov>=4.1.0",
+    "httpx>=0.25.2",
+    "black>=23.12.0",
+    "ruff>=0.1.9",
+    "mypy>=1.7.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/girdav01/AntiFraudAgent"
+Repository = "https://github.com/girdav01/AntiFraudAgent"
+Issues = "https://github.com/girdav01/AntiFraudAgent/issues"
+
+[tool.setuptools]
+packages = ["agents", "parsers", "exporters", "llm", "cti", "ui", "mcp", "config"]
+
+[tool.black]
+line-length = 100
+target-version = ['py310', 'py311', 'py312']
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=. --cov-report=html --cov-report=term"

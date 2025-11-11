@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  antifraud-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: antifraud-agent
+    image: antifraud-agent:latest
+
+    # Security: Run as non-root, read-only filesystem, no new privileges
+    user: "1000:1000"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+
+    # Ports
+    ports:
+      - "8501:8501"  # Streamlit UI
+
+    # Environment variables
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=America/Montreal
+
+    # Environment file (secrets)
+    env_file:
+      - .env
+
+    # Volumes
+    volumes:
+      # Configuration (read-only)
+      - ./config:/app/config:ro
+
+      # Data directory (read-write)
+      - ./data:/data:rw
+
+      # Logs directory (read-write)
+      - ./logs:/logs:rw
+
+      # Models directory (read-only)
+      - ./models:/models:ro
+
+      # Temporary directory (tmpfs)
+      - /tmp
+
+    # Tmpfs mounts for read-only filesystem
+    tmpfs:
+      - /tmp:mode=1777,size=1G
+      - /app/.streamlit:mode=755,size=10M
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Network
+    networks:
+      - antifraud-network
+
+    # Healthcheck
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8501/healthz', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# Networks
+networks:
+  antifraud-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+
+# Volumes (optional: for persistent data)
+volumes:
+  antifraud-data:
+    driver: local
+  antifraud-logs:
+    driver: local

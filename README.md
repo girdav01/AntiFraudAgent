@@ -335,6 +335,136 @@ import asyncio
 asyncio.get_event_loop().run_forever()
 ```
 
+### REST API Usage
+
+```bash
+# Start the API server
+uvicorn api.main:app --host 0.0.0.0 --port 8000
+
+# Or with Docker
+docker run -p 8000:8000 antifraud-agent:latest uvicorn api.main:app --host 0.0.0.0
+```
+
+Access API documentation at `http://localhost:8000/docs`
+
+**Example API Calls:**
+
+```python
+import requests
+
+# Analyze URL
+response = requests.post(
+    "http://localhost:8000/analyze/url",
+    json={"url": "https://suspicious-site.com"},
+    headers={"X-API-Key": "your-api-key"}
+)
+result = response.json()
+
+# Enrich IOCs
+response = requests.post(
+    "http://localhost:8000/enrich/iocs",
+    json={"iocs": ["malicious.com", "192.168.1.1"]},
+    headers={"X-API-Key": "your-api-key"}
+)
+
+# ML Prediction
+response = requests.post(
+    "http://localhost:8000/ml/predict",
+    json={"text": "Your account has been suspended...", "url": "http://phish.com"},
+    headers={"X-API-Key": "your-api-key"}
+)
+```
+
+### ML-Based Classification
+
+```python
+from ml.fraud_classifier import FraudClassifier
+
+# Initialize classifier
+classifier = FraudClassifier(model_type="random_forest")
+
+# Train on data
+training_data = [...]  # List of content dictionaries
+labels = ["phishing", "scam", "legitimate", ...]
+
+results = classifier.train(training_data, labels)
+print(f"Accuracy: {results['accuracy']:.2%}")
+
+# Save model
+classifier.save_model("models/fraud_classifier.pkl")
+
+# Predict
+prediction = classifier.predict({"text": "...", "url": "..."})
+print(f"Fraud Type: {prediction['fraud_type']}")
+print(f"Confidence: {prediction['confidence']}%")
+```
+
+### Webhook Alerts
+
+```python
+from config.webhook_alerts import WebhookAlertManager, AlertSeverity
+
+# Configure webhooks
+webhooks = [
+    {
+        "name": "slack",
+        "url": "https://hooks.slack.com/services/YOUR/WEBHOOK/URL",
+        "min_severity": "high",
+        "secret": "your-secret"
+    }
+]
+
+webhook_manager = WebhookAlertManager(webhooks)
+
+# Send alert
+webhook_manager.send_fraud_detected_alert({
+    "fraud_type": "phishing",
+    "confidence": 85,
+    "source_url": "http://malicious.com"
+})
+```
+
+### YARA Rule Generation
+
+```python
+from exporters.yara_generator import YARAGenerator
+
+yara_gen = YARAGenerator()
+
+# Generate rules from findings
+findings = [...]  # Your fraud findings
+rules = yara_gen.generate_rules_from_findings(findings, min_confidence=70)
+
+# Save rules
+yara_gen.save_rules(rules, "output/fraud_rules.yar")
+
+# Generate custom IOC rule
+iocs = ["malicious.com", "192.168.1.1", "bad-hash-here"]
+rule = yara_gen.generate_ioc_rule(
+    iocs=iocs,
+    rule_name="fraud_campaign_2024",
+    description="Fraud campaign IOCs from Jan 2024"
+)
+```
+
+### Jupyter Notebook Analysis
+
+```bash
+# Start Jupyter
+jupyter notebook notebooks/fraud_analysis.ipynb
+
+# Or use JupyterLab
+jupyter lab
+```
+
+The notebook includes:
+- Interactive fraud findings analysis
+- Visualization of threat trends
+- IOC analysis and enrichment
+- Custom ML model training
+- YARA rule generation
+- Report export
+
 ---
 
 ## 🐳 Docker Deployment
@@ -564,13 +694,19 @@ For issues, questions, or contributions:
 
 ## 🛣️ Roadmap
 
+### ✅ Recently Implemented
+- [x] **Advanced ML-based fraud classification** - scikit-learn classifiers with TF-IDF vectorization
+- [x] **Real-time webhook alerts** - HTTP webhooks with HMAC signatures and severity filtering
+- [x] **YARA rule generation** - Automatic YARA rule creation from fraud findings
+- [x] **Jupyter notebook for analysis** - Interactive analysis with visualizations
+- [x] **REST API** - FastAPI-based API with OpenAPI documentation
+
+### 🔜 Future Enhancements
 - [ ] Additional CTI source integrations (MISP, AlienVault OTX)
-- [ ] Advanced ML-based fraud classification
-- [ ] Real-time webhook alerts
-- [ ] YARA rule generation from findings
-- [ ] Jupyter notebook for analysis
-- [ ] REST API for programmatic access
 - [ ] Kubernetes deployment manifests
+- [ ] GraphQL API support
+- [ ] Real-time streaming data pipeline
+- [ ] Advanced threat hunting queries
 
 ---
 

@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: antifraud-agent
+  labels:
+    app: antifraud-agent
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: antifraud-agent
+  template:
+    metadata:
+      labels:
+        app: antifraud-agent
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: antifraud-agent
+        image: yourusername/antifraud-agent:1.0.0
+        ports:
+        - containerPort: 8501
+          name: ui
+        - containerPort: 8000
+          name: api
+        env:
+        - name: VIRUSTOTAL_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: antifraud-secrets
+              key: virustotal-api-key
+        - name: TREND_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: antifraud-secrets
+              key: trend-api-key
+        resources:
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: logs
+          mountPath: /logs
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: antifraud-data-pvc
+      - name: logs
+        persistentVolumeClaim:
+          claimName: antifraud-logs-pvc
+      - name: tmp
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: antifraud-agent-ui
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8501
+    name: ui
+  selector:
+    app: antifraud-agent
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: antifraud-agent-api
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8000
+    name: api
+  selector:
+    app: antifraud-agent
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: antifraud-secrets
+type: Opaque
+stringData:
+  virustotal-api-key: "YOUR_VT_KEY_HERE"
+  trend-api-key: "YOUR_TREND_KEY_HERE"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: antifraud-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: antifraud-logs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
